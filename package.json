@@ -1,0 +1,25 @@
+{
+  "name": "QueueCast",
+  "version": "0.0.0",
+  "description": "server for Audio Hackathon Team 1",
+  "main": "server.js",
+  "repository": {
+    "type": "git",
+    "url": "git://https://github.com/therewasaguy/qc-server.git"
+  },
+  "author": "",
+  "license": "BSD-2-Clause",
+  "bugs": {
+    "url": "https://github.com/therewasaguy/qc-server/issues"
+  },
+  "homepage": "https://github.com/therewasaguy/qc-server",
+  "dependencies": {
+    "express": "~4.13.3",
+    "body-parser": "~1.14.0",
+    "cookie-parser": "~1.4.0",
+    "express-session": "~1.11.3",
+    "jade": "~1.11.0",
+    "request": "~2.62.0",
+    "dotenv": "~1.2.0"
+  }
+}
