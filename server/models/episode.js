@@ -2,25 +2,25 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var User = require('./user');
 
-var episodeSchema = new Schema({
-	title: String,
-	description: String,
-	date_created: String,
-	show_title: String,
-	digital_location: String,
-	path_to_mp3: String,
-	duration: String,
-	image_urls: [{
-		full: String,
-		thumb: String
-	}],
-	audiosearchID: Number,
-
-	usersWhoLikeThis: [{
-		type: Schema.Types.ObjectId,
-		ref: User
-	}],
-
+var episodeSchema = new Schema ({
+  id: Number,
+  audio_search_id: Number,
+  audio_url: String,
+  duration: String,
+  previewStart: Number,
+  previewStop: Number,
+  template: {
+    show_title: String,
+    show_Image: String,
+    episode_image: String,
+    episode_title: String,
+    episodeDesc: string,
+    usersWhoLikeThis: [{
+			type: Schema.Types.ObjectId,
+			ref: User
+		}],
+    tags: [String]
+  }
 });
 
 var Episode = mongoose.model('Episode', episodeSchema);
