@@ -12,8 +12,12 @@ var Episode = require('./models/episode.js');
 module.exports = db = {
 	init: function(context, callback) {
 		app = context;
-		mongoose.connect(dbURL)
-		callback();
+		if (dbURL) {
+			mongoose.connect(dbURL)
+			callback();
+		} else {
+			console.log('unable to connect to database, please provide a DATABASE_URL environment variable i.e. in a .env file');
+		}
 
 
 		app.get('/all_users', function(req, res) {
