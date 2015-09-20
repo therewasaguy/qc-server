@@ -16,9 +16,9 @@ var port = process.env.PORT || 8000;
 var app = express();
 
 app.use(express.static('public'));
-app.set('views', __dirname + '/public/views')
-app.set('view engine', 'html');
-app.use(express.static('public'));
+// app.set('views', __dirname + '/public/views')
+// app.set('view engine', 'jade');
+app.use(express.static(__dirname+'/public'));
 
 // require('./server/routes.js');
 
@@ -37,12 +37,40 @@ app.get('/', function(req, res) {
 	res.sendFile('index.html');
 });
 
+app.get('/audiogrep', function(req, res) {
+	res.sendFile(__dirname+'/public/views/audiogrep.html');
+});
+
 // example query: server/categories?cat1=comedy&cat2=drama
 app.get('/categories/*', function(req, res) {
 	var cat = req.url.split('/').pop();
 	audiosearch.searchEpisodes(cat).then(function (results) {
 		res.send(results);
 	});
+});
+
+// initialize with one of the keywords for the user's action
+app.get('/init/*', function(req, res) {
+	// keywords are ['laugh', 
+	var cat = req.url.split('/').pop();
+	audiosearch.searchEpisodes(cat).then(function (results) {
+		res.send(results);
+	});
+
+	// also create a token and start tracking against that token
+
+});
+
+
+app.get('/onswipe', function(req, res) {
+	// id of episode, and true/false
+	// user id if logged in
+
+});
+
+	// get user id, and generate a recommendation based on what we know
+app.get('/queue', function(req, res) {
+	// TO DO
 });
 
 // example query: (server_url)/similarshowsbyname/
@@ -55,10 +83,9 @@ app.get('/similarshowsbyname/*', function(req, res) {
 		try {
 			_id = results.results[0]['id'];
 		} catch(e) {
-			console.log('error');
+			console.log('error fetching similar shows');
 			return;
 		}
-		console.log('made it here');
 		audiosearch.get('/shows/'+_id+'/related').then(function(newResults) {
 			console.log('success');
 			res.send(newResults);
@@ -66,3 +93,10 @@ app.get('/similarshowsbyname/*', function(req, res) {
 	});
 });
 
+
+app.get('/grep/*', function(req, res) {
+	var topic = req.url.split('/').pop();
+	audiosearch.searchEpisodes(topic).then(function (results) {
+		res.send(results);
+	});
+});
