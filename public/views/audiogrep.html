@@ -1,0 +1,220 @@
+<!doctype html>
+
+<head>
+	<style>
+	.container {
+		display: flex;
+		flex-direction: row;
+	}
+	.child {
+		padding:10px;
+	}
+	#episode-image {
+		max-width:500px;
+		max-height:500px;
+	}
+	</style>
+	<script src="../js/p5audioElt.js"></script>
+	<script>
+	// two audio elements, one to load the next file
+	var audioDecks;
+	var _audioFiles;
+	var datum;
+
+	function makeRequest (method, url, done) {
+		var xhr = new XMLHttpRequest();
+		xhr.open(method, url);
+		xhr.onload = function () {
+			done(null, xhr.response);
+		};
+		xhr.onerror = function () {
+			done(xhr.response);
+		};
+		xhr.send();
+	}
+
+	window.onload = function() {
+
+		var submitButton = document.getElementById('submit-button');
+		var inputs = document.querySelectorAll('.showfield');
+
+		submitButton.onclick = function(e) {
+			// reset audio decks
+			resetAudioDecks();
+
+			var topic = inputs[0].value;
+			makeRequest('GET', '/grep/' + topic, function (err, datums) {
+				if (err) { throw err; }
+				var results = JSON.parse(datums).results;
+				var resLen = results.length;
+				var audioFiles = [];
+
+				for (var i = 0; i < resLen; i++) {
+					var result = results[i];
+					var obj = result;
+					obj.mp3src = result.audio_files[0].mp3;
+
+
+					// flatten the array of array of cues, which there are more of than highlights
+					if (result.excerpts) {
+						obj.cues = result.excerpts.reduce(function(a, b) {
+							return a.concat(b);
+						});
+					}
+
+					// replace with highlights
+					if (result.highlights && result.highlights[0]) {
+						console.log('highlights');
+						obj.cues = result.highlights[0].transcript;
+						console.log('highlights length: ' + result.highlights.length);
+					}
+
+					if (obj.cues && obj.cues.length > 0) {
+						audioFiles.push(obj);
+					}
+				}
+				queueResults(audioFiles);
+			});
+		};
+
+		// clear audio decks if they exist, otherwise create them
+		function resetAudioDecks() {
+			if (audioDecks) {
+				for (var i = 0; i < audioDecks.length; i++) {
+					audioDecks[i].stop();
+				}
+			}
+			else {
+				audioDecks = [new p5AudioElt(), new p5AudioElt];
+			}
+		}
+		// loop thru all the queues from each audiofile and play them !
+		function queueResults(audioFiles) {
+
+			// for testing:
+			_audioFiles = audioFiles;
+
+			var audioIndex = 0;
+			var cueIndex = 0;
+			var aFile = audioFiles[audioIndex];
+
+			loadDeck(audioFiles, audioIndex);
+			loadDeck(audioFiles, audioIndex + 1);
+
+			audioElt = audioDecks[audioIndex % 2];
+
+			function nextCue() {
+				clearCues(audioDecks);
+				// console.log('audio index: ' + audioIndex + ', cueIndex: ' + cueIndex)
+
+				// if we have played all the cues for this audio file...
+				if (cueIndex == aFile.cues.length) {
+					if (audioIndex < audioFiles.length - 1) {
+						console.log('next audio file');
+						audioElt.stop();
+						audioIndex++;
+
+						// reset indexes for new audio source
+						cueIndex = 0;
+
+						// load new deck and new file in previous deck
+						aFile = audioFiles[audioIndex];
+						audioElt = audioDecks[audioIndex % 2];
+						loadDeck(audioFiles, audioIndex + 1);
+					} else {
+						audioElt.stop();
+						console.log('done');
+						return;
+					}
+				}
+
+				// update episode info
+				var ep = audioFiles[audioIndex];
+				document.getElementById('episode-image').src = ep.image_urls.full;
+				var contributorInfo = ep.contributors ? '. Featuring ' + ep.contributors[0].name : '';
+				if (ep.contributors && ep.contributors.length >  1) {
+					ep.contributors += ('& ' + ep.contributors[1].name)
+				}
+				var epInfo ='<h2>'+ ep.title + '</h2><h3> From ' + ep.show_title + ' / ' + ep.network + ' on ' + ep.date_created + contributorInfo + '</h3><p>'+ep.description+'</p>';
+				document.getElementById('episode-info').innerHTML = epInfo;
+
+				console.log('next cue');
+				// play next cue for this audio file
+				var startTime = aFile.cues[cueIndex].start_time;
+				var endTime = aFile.cues[cueIndex].end_time;
+				audioElt.play();
+				audioElt.time(startTime);
+				audioElt.addCue(endTime, nextCue);
+
+				cueIndex++;
+			}
+
+			nextCue();
+
+
+			function loadDeck(audioFiles, index) {
+				if (index >= audioFiles.length) {
+					return null;
+				} else {
+					var i = index % audioDecks.length;
+					// set that audio deck's mp3 source
+					audioDecks[i].src(audioFiles[index].mp3src);
+					console.log('loading ' + i);
+
+					// prepare to play at the first cue point
+					audioDecks[i].time(audioFiles[index].cues[0].start_time);
+					audioDecks[i].load();
+				}
+			}
+
+			console.log(audioFiles);
+		}
+
+		function clearCues(decks) {
+			for (var i = 0; i < decks.length; i++) {
+				decks[i].clearCues();
+			}
+		}
+
+		// keyup listener for input field(s)
+		for (var i in inputs) {
+			inputs[i].onkeyup = function(e) {
+				checkForValidInputs();
+			}
+		}
+
+		function checkForValidInputs() {
+			var count = 0;
+			for (var i in inputs) {
+				if (inputs[i].value) {
+					count++;
+				}
+			}
+			if (count >= inputs.length) {
+				submitButton.disabled = false;
+			}
+		}
+	};
+	</script>
+
+</head>
+
+<body>
+	<input placeholder="enter a topic" class="showfield"></input>
+
+<!-- 	<input placeholder="enter a show" class="showfield"></input>
+	<input placeholder="enter a show" class="showfield"></input>
+ -->
+	<button id="submit-button" disabled>Submit</button>
+
+	<h1>Now Playing:</h1>
+	<div class="container">
+		<div class="child">
+			<img id="episode-image"/>
+		</div>
+		<div>
+			<div id="episode-info" class="child"></div>
+			<p id="episode-description"></p>
+		</div>
+	</div>
+</body>
