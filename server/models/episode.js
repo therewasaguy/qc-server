@@ -7,15 +7,15 @@ var episodeSchema = new Schema ({
   audio_search_id: Number,
   audio_url: String,
   duration: String,
-  previewStart: Number,
-  previewStop: Number,
+  preview_start: Number,
+  preview_stop: Number,
   template: {
     show_title: String,
-    show_Image: String,
+    show_image: String,
     episode_image: String,
     episode_title: String,
     episodeDesc: string,
-    usersWhoLikeThis: [{
+    users_who_liked: [{
 			type: Schema.Types.ObjectId,
 			ref: User
 		}],
