@@ -55,13 +55,18 @@ app.get('/categories/*', function(req, res) {
 });
 
 // initialize with one of the keywords for the user's action
-app.get('/init/*', function(req, res) {
-	// keywords are ['laugh',
-	var cat = req.url.split('/').pop();
-	audiosearch.searchEpisodes(cat).then(function (results) {
-		res.send(results);
-	});
-
+app.get('/init/:category', function(req, res) {
+	if (req.body.user_id) {
+		// find the user
+		// respond with episodes
+	} else {
+		// create the user,
+		// respond with user id & episodes
+	}
+	// var cat = req.url.split('/').pop();
+	// audiosearch.searchEpisodes(cat).then(function (results) {
+	// 	res.send(results);
+	// });
 	// also create a token and start tracking against that token
 
 });
