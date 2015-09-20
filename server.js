@@ -3,8 +3,11 @@ var bodyParser = require('body-parser')
 var cookieParser = require('cookie-parser');
 var session = require('express-session');
 var request = require('request');
+var os = require('os');
 
-require('dotenv').load();
+if(os.hostname().indexOf("local") > -1) {
+	require('dotenv').load();
+}
 
 var AudioSearch = require('./audiosearch/index');
 var audiosearch = new AudioSearch(process.env.AUDIOSEARCH_APP_ID, process.env.AUDIOSEARCH_SECRET);
@@ -34,7 +37,6 @@ app.get('/', function(req, res) {
 	res.sendFile('index.html');
 });
 
-
 // example query: server/categories?cat1=comedy&cat2=drama
 app.get('/categories', function(req, res) {
 	var params = req.query;
@@ -50,10 +52,8 @@ app.get('/categories', function(req, res) {
 	}
 });
 
-
+// example query: (server_url)/similarshowsbyname/
 app.get('/similarshowsbyname', function(req, res) {
-	var params = req.query;
-	console.log(params);
 	for (var i in params) {
 		// check if it is a category
 		if (i.indexOf('show') > -1) {
