@@ -6,7 +6,7 @@ var errorHandler = function(er) {
 };
 
 var createEpisode = function(data, previewStart, previewStop) {
-  var epi = new Episode({});
+  var epi = {};
 
   epi.audio_search_id = data.episode.id;
   epi.audio_url = data.episode.audio_files[0].url[0];
@@ -21,13 +21,15 @@ var createEpisode = function(data, previewStart, previewStop) {
   epi.template.episode_description = "";
   epi.tags = data.episode.tags;
 
-  epi.save(function(err){
-    if (err) {
-      console.log("shit that didn't save");
-    } else {
-      console.log('episode ' + epi.template.show_title + ' saved!');
-    }
-  });
+  // epi.save(function(err){
+  //   if (err) {
+  //     console.log("shit that didn't save");
+  //   } else {
+  //     console.log('episode ' + epi.template.show_title + ' saved!');
+  //   }
+  // });
+
+  return epi;
 
 };
 
@@ -47,8 +49,10 @@ var createOrFindEpisode = function(episodes) {
   });
 };
 
-module.exports = {
+
+var EpisodeLoader = {
   createOrFindEpisode: createOrFindEpisode,
   addEpisode: createEpisode
 };
 
+module.exports = EpisodeLoader;

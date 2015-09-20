@@ -14,7 +14,7 @@ var episodeSchema = new Schema ({
     show_image: String,
     episode_image: String,
     episode_title: String,
-    episodeDesc: string,
+    episodeDesc: String,
     users_who_liked: [{
 			type: Schema.Types.ObjectId,
 			ref: User

@@ -82,6 +82,15 @@ app.get('/queue', function(req, res) {
 	// TO DO
 });
 
+app.get('/search/:id', function(req, res) {
+	var id = parseInt(req.params.id, 16);
+	console.log("the id is ", id)
+	audiosearch.get('/episodes/'+id).then(function(results){
+		console.log(results);
+		res.send(results);
+	});
+
+});
 // example query: (server_url)/similarshowsbyname/
 app.get('/similarshowsbyname/*', function(req, res) {
 	var show = req.url.split('/').pop();
