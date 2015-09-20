@@ -12,7 +12,7 @@ if(os.hostname().indexOf("local") > -1) {
 var AudioSearch = require('./audiosearch/index');
 var audiosearch = new AudioSearch(process.env.AUDIOSEARCH_APP_ID, process.env.AUDIOSEARCH_SECRET);
 
-var port = 8000;
+var port = process.env.PORT || 8000;
 var app = express();
 
 app.use(express.static('public'));
