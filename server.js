@@ -38,30 +38,31 @@ app.get('/', function(req, res) {
 });
 
 // example query: server/categories?cat1=comedy&cat2=drama
-app.get('/categories', function(req, res) {
-	var params = req.query;
-
-	for (var i in params) {
-
-		// check if it is a category
-		if (i.indexOf('cat') > -1) {
-			audiosearch.searchEpisodes(params[i]).then(function (results) {
-				res.send(results);
-			});
-		}
-	}
+app.get('/categories/*', function(req, res) {
+	var cat = req.url.split('/').pop();
+	audiosearch.searchEpisodes(cat).then(function (results) {
+		res.send(results);
+	});
 });
 
 // example query: (server_url)/similarshowsbyname/
-app.get('/similarshowsbyname', function(req, res) {
-	for (var i in params) {
-		// check if it is a category
-		if (i.indexOf('show') > -1) {
-			var show = params[i];
-			audiosearch.get('/search/shows/' + encodeURI(params[i]) ).then(function (results) {
-				res.send(results);
-			});
+app.get('/similarshowsbyname/*', function(req, res) {
+	var show = req.url.split('/').pop();
+	var _id;
+	audiosearch.get('/search/shows/' + encodeURI(show) ).then(function (results) {
+		// get similar shows by ID
+		// console.log(results[0].id);
+		try {
+			_id = results.results[0]['id'];
+		} catch(e) {
+			console.log('error');
+			return;
 		}
-	}
+		console.log('made it here');
+		audiosearch.get('/shows/'+_id+'/related').then(function(newResults) {
+			console.log('success');
+			res.send(newResults);
+		});
+	});
 });
 
