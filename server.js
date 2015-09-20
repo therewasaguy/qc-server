@@ -14,7 +14,7 @@ var app = express();
 
 app.use(express.static('public'));
 app.set('views', __dirname + '/public/views')
-app.set('view engine', 'jade');
+app.set('view engine', 'html');
 app.use(express.static('public'));
 
 // require('./server/routes.js');
@@ -22,6 +22,13 @@ app.use(express.static('public'));
 app.listen(port, function(err) {
 	console.log('Running on port ' + port);
 });
+
+
+app.db = require('./server/dbcontroller.js'); // load our routes and pass in our app and fully configured passport
+app.db.init(app, function() {
+	console.log('db initted');
+});
+
 
 app.get('/', function(req, res) {
 	res.sendFile('index.html');
@@ -43,9 +50,6 @@ app.get('/categories', function(req, res) {
 	}
 });
 
-// Audiosearch.prototype.searchShows = function (queryString, params) {
-//   return this.get('/search/shows/'+encodeURI(queryString), params);
-// };
 
 app.get('/similarshowsbyname', function(req, res) {
 	var params = req.query;
@@ -60,3 +64,4 @@ app.get('/similarshowsbyname', function(req, res) {
 		}
 	}
 });
+
