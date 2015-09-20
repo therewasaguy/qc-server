@@ -48,29 +48,32 @@
 				var results = JSON.parse(datums).results;
 				var resLen = results.length;
 				var audioFiles = [];
-
+				console.log(results);
 				for (var i = 0; i < resLen; i++) {
 					var result = results[i];
 					var obj = result;
-					obj.mp3src = result.audio_files[0].mp3;
+					try {
+						obj.mp3src = result.audio_files[0].mp3;
 
+						// flatten the array of array of cues, which there are more of than highlights
+						if (result.excerpts) {
+							obj.cues = result.excerpts.reduce(function(a, b) {
+								return a.concat(b);
+							});
+						}
 
-					// flatten the array of array of cues, which there are more of than highlights
-					if (result.excerpts) {
-						obj.cues = result.excerpts.reduce(function(a, b) {
-							return a.concat(b);
-						});
-					}
+						// replace with highlights
+						if (result.highlights && result.highlights[0]) {
+							console.log('highlights');
+							obj.cues = result.highlights[0].transcript;
+							console.log('highlights length: ' + result.highlights.length);
+						}
 
-					// replace with highlights
-					if (result.highlights && result.highlights[0]) {
-						console.log('highlights');
-						obj.cues = result.highlights[0].transcript;
-						console.log('highlights length: ' + result.highlights.length);
-					}
-
-					if (obj.cues && obj.cues.length > 0) {
-						audioFiles.push(obj);
+						if (obj.cues && obj.cues.length > 0) {
+							audioFiles.push(obj);
+						}
+					} catch(e) {
+						console.log('no mp3 exists!');
 					}
 				}
 				queueResults(audioFiles);
@@ -130,6 +133,7 @@
 
 				// update episode info
 				var ep = audioFiles[audioIndex];
+				document.getElementById('toast-msg').innerHTML = 'Now Playing:';
 				document.getElementById('episode-image').src = ep.image_urls.full;
 				var contributorInfo = ep.contributors ? '. Featuring ' + ep.contributors[0].name : '';
 				if (ep.contributors && ep.contributors.length >  1) {
@@ -179,11 +183,11 @@
 		// keyup listener for input field(s)
 		for (var i in inputs) {
 			inputs[i].onkeyup = function(e) {
-				checkForValidInputs();
+				checkForValidInputs(e);
 			}
 		}
 
-		function checkForValidInputs() {
+		function checkForValidInputs(e) {
 			var count = 0;
 			for (var i in inputs) {
 				if (inputs[i].value) {
@@ -192,6 +196,9 @@
 			}
 			if (count >= inputs.length) {
 				submitButton.disabled = false;
+				if (e.keyCode == 13) {
+					submitButton.click();
+				}
 			}
 		}
 	};
@@ -207,7 +214,7 @@
  -->
 	<button id="submit-button" disabled>Submit</button>
 
-	<h1>Now Playing:</h1>
+	<h1 id="toast-msg"></h1>
 	<div class="container">
 		<div class="child">
 			<img id="episode-image"/>
