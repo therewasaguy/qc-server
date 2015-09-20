@@ -38,8 +38,13 @@ app.get('/', function(req, res) {
 });
 
 app.get('/audiogrep', function(req, res) {
+	res.redirect('/radiogrep');
+});
+
+app.get('/radiogrep', function(req, res) {
 	res.sendFile(__dirname+'/public/views/audiogrep.html');
 });
+
 
 // example query: server/categories?cat1=comedy&cat2=drama
 app.get('/categories/*', function(req, res) {
