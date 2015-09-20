@@ -5,6 +5,32 @@ var errorHandler = function(er) {
   console.log(er);
 };
 
+var createEpisode = function(data, previewStart, previewStop) {
+  var epi = new Episode({});
+
+  epi.audio_search_id = data.episode.id;
+  epi.audio_url = data.episode.audio_files[0].url[0];
+  epi.duration = data.episode.audio_files[0].duration;
+  epi.preview_start = previewStart || 100;
+  epi.preview_stop = previewStop || 115;
+  epi.template = {};
+  epi.template.show_title = data.episode.show_title;
+  epi.template.show_image = data.episode.image_urls.full;
+  epi.template.episode_image = data.episode.images_urls.full;
+  epi.template.episode_title = data.episode.title;
+  epi.template.episode_description = "";
+  epi.tags = data.episode.tags;
+
+  epi.save(function(err){
+    if (err) {
+      console.log("shit that didn't save");
+    } else {
+      console.log('episode ' + epi.template.show_title + ' saved!');
+    }
+  });
+
+};
+
 var createOrFindEpisode = function(episodes) {
   episodes.forEach(function(ep){
     Episode.findOne({ 'audio_search_id': ep.episode.id }, function(err, episode) {
@@ -15,33 +41,14 @@ var createOrFindEpisode = function(episodes) {
         return episode;
       } else {
         console.log('adding episode to the database');
-        var epi = new Episode({});
-
-        epi.audio_search_id = ep.episode.id;
-        epi.audio_url = ep.episode.audio_files[0].url[0];
-        epi.duration = ep.episode.audio_files[0].duration;
-        ep.preview_start = 100;
-        ep.preview_stop = 115;
-        ep.template = {};
-        ep.template.show_title = ep.episode.show_title;
-        ep.template.show_image = ep.episode.image_urls.full;
-        ep.template.episode_image = ep.episode.images_urls.full;
-        ep.template.episode_title = ep.episode.title;
-        ep.template.episode_description = "";
-        ep.tags = ep.episode.tags;
-
-        ep.save(function(err){
-          if (err) {
-            console.log("shit that didn't save");
-          } else {
-            console.log('episode ' + ep.template.show_title + ' saved!');
-          }
-        })
-
+        return createEpisode(ep);
       }
     });
   });
 };
 
-module.exports = episodeLoader = createOrFindEpisode;
+module.exports = {
+  createOrFindEpisode: createOrFindEpisode,
+  addEpisode: createEpisode
+};
 
