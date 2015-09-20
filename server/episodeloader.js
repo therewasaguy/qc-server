@@ -43,5 +43,5 @@ var createOrFindEpisode = function(episodes) {
   });
 };
 
-module.exports = episodeLoader;
+module.exports = episodeLoader = createOrFindEpisode;
 
