@@ -56,7 +56,7 @@ app.get('/categories/*', function(req, res) {
 
 // initialize with one of the keywords for the user's action
 app.get('/init/*', function(req, res) {
-	// keywords are ['laugh', 
+	// keywords are ['laugh',
 	var cat = req.url.split('/').pop();
 	audiosearch.searchEpisodes(cat).then(function (results) {
 		res.send(results);
@@ -70,7 +70,6 @@ app.get('/init/*', function(req, res) {
 app.get('/onswipe', function(req, res) {
 	// id of episode, and true/false
 	// user id if logged in
-
 });
 
 	// get user id, and generate a recommendation based on what we know
